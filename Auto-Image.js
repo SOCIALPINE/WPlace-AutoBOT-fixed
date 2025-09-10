@@ -1545,6 +1545,10 @@
       return new Promise((resolve) => {
         try {
           // Force cleanup of any existing widget
+              if (this._turnstileWidgetId && this._lastSitekey === sitekey) {
+                console.log("♻️ Reusing existing Turnstile widget instead of creating new one");
+                return resolve(isTokenValid() ? turnstileToken : null);
+            }
           if (this._turnstileWidgetId && window.turnstile?.remove) {
             try {
               window.turnstile.remove(this._turnstileWidgetId);
