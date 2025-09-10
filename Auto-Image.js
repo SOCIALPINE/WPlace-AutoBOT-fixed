@@ -1703,16 +1703,18 @@
     },
 
     async obtainSitekeyAndToken(fallback = '0x4AAAAAABpqJe8FO0N84q0F') {
-      // Cache sitekey to avoid repeated DOM queries
+      // 1. 메모리 캐시 확인
       if (this._cachedSitekey) {
-        console.log('🔍 Using cached sitekey:', this._cachedSitekey);
-
         return isTokenValid()
-          ? {
-              sitekey: this._cachedSitekey,
-              token: turnstileToken,
-            }
+          ? { sitekey: this._cachedSitekey, token: turnstileToken }
           : { sitekey: this._cachedSitekey, token: null };
+      }
+    
+      // 2. localStorage 캐시 확인
+      const saved = localStorage.getItem('wplace_sitekey');
+      if (saved) {
+        this._cachedSitekey = saved;
+        return { sitekey: saved, token: isTokenValid() ? turnstileToken : null };
       }
 
       // List of potential sitekeys to try
@@ -1816,6 +1818,9 @@
 
       console.error('❌ No working sitekey or token found.');
       return { sitekey: null, token: null };
+      if (this._cachedSitekey) {
+        localStorage.setItem('wplace_sitekey', this._cachedSitekey);
+       }
     },
 
     createElement: (tag, props = {}, children = []) => {
